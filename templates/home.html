@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Jaishnavi Galidinne | Portfolio</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;700&display=swap" rel="stylesheet">
+  <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+  <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+  <script>
+    (function () {
+      const savedTheme = localStorage.getItem('theme') || 
+        (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+</head>
+<body>
+  <div class="gradient-bg"></div>
+
+  <header>
+    <div class="logo-container">
+      <a href="/">
+        <img src="{{ url_for('static', filename='logo.png') }}" alt="Jaishnavi Galidinne Logo" class="circular-logo">
+      </a>
+    </div>
+    <nav>
+      <a href="/home" class="nav-link">Home</a>
+      <a href="/about" class="nav-link">About</a>
+      <a href="/skills" class="nav-link">Skills</a>
+      <a href="/projects" class="nav-link">Projects</a>
+      <a href="/education" class="nav-link">Education</a>
+      <a href="/contact" class="nav-link">Contact</a>
+      
+      <button id="theme-toggle" aria-label="Toggle theme" style="background: none; border: none; cursor: pointer; font-size: 1.2rem; margin-left: 15px; padding: 0;">
+        <span id="theme-icon">🌙</span>
+      </button>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="hero-content">
+      <h1 data-aos="fade-down" data-aos-duration="1000">Jaishnavi Galidinne</h1>
+      
+      <p class="subtitle" data-aos="fade-up" data-aos-delay="200">
+        I am a <span id="typed" class="highlight"></span>
+      </p>
+
+      <p class="description" data-aos="fade-up" data-aos-delay="400">
+        Motivated Computer Science undergraduate with strong foundations in programming, data analysis, and web development. Eager to apply technical skills to solve real-world problems.
+      </p>
+      <br>
+    </div>
+  </section>
+
+  <section id="resume" style="padding: 60px 20px; text-align: center; max-width: 900px; margin: 0 auto;" data-aos="fade-up">
+    <h2 style="font-size: 2.5rem; margin-bottom: 10px;">My Resume</h2>
+    <p style="margin-bottom: 30px; opacity: 0.8;">View, download, or print my complete professional curriculum vitae.</p>
+
+    <div class="buttons" style="display: flex; justify-content: center; flex-wrap: wrap; gap: 15px; margin-bottom: 30px;">
+      <button id="open-resume" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px; cursor: pointer;">
+        📄 View Resume
+      </button>
+      <a href="{{ url_for('static', filename='Resume_jai.pdf') }}" download="Jaishnavi_Galidinne_CV.pdf" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
+        📥 Download CV
+      </a>
+      <a href="/projects" class="btn primary" style="display: inline-flex; align-items: center; gap: 8px;">
+      View My Work
+      </a>
+    </div>
+  </section>
+
+  <footer style="margin-top: 5rem; padding: 2rem 0; text-align: center; border-top: 1px solid rgba(13, 3, 3, 0.1);">
+    <div class="social-media" style="margin-bottom: 1.5rem; display: flex; justify-content: center; gap: 20px;">
+      <a href="https://www.linkedin.com/in/jaishnavi-galidinne-57ab21349" target="_blank" rel="noopener noreferrer" style="font-size: 1.5rem; color: var(--text-primary); text-decoration: none;"><i class='bx bxl-linkedin'></i></a>
+      <a href="https://github.com/galidinnejaishnavi" target="_blank" rel="noopener noreferrer" style="font-size: 1.5rem; color: var(--text-primary); text-decoration: none;"><i class='bx bxl-github'></i></a>
+      <a href="mailto:galidinnejaishnavi@gmail.com" style="font-size: 1.5rem; color: var(--text-primary); text-decoration: none;"><i class='bx bxl-gmail'></i></a>
+      <a href="https://wa.me/916309668256" target="_blank" rel="noopener noreferrer" style="font-size: 1.5rem; color: var(--text-primary); text-decoration: none;"><i class='bx bxl-whatsapp'></i></a>
+    </div>
+    <p style="font-size: 0.8rem; color: var(--text-secondary); margin: 0;">&copy; 2026 Jaishnavi Galidinne. All rights reserved.</p>
+  </footer>
+
+  <div id="resume-modal" class="modal-overlay">
+    <div class="modal-content glass-card">
+      <div class="modal-header">
+        <h3>Jaishnavi Galidinne - Resume</h3>
+        <button id="close-resume" class="close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <object data="{{ url_for('static', filename='Resume_jai.pdf') }}" type="application/pdf" width="100%" height="100%">
+          <p>Your browser doesn't support embedding PDFs. 
+             <a href="{{ url_for('static', filename='Resume_jai.pdf') }}" target="_blank">Click here to view it directly instead.</a>
+             
+            </p>
+        </object>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+  <script src="https://unpkg.com/typed.js@2.0.16/dist/typed.umd.js"></script>
+  <script src="{{ url_for('static', filename='script.js') }}" defer></script>
+
+  <script>
+    AOS.init({ once: true });
+
+    if (document.getElementById('typed')) {
+      var typed = new Typed('#typed', {
+        strings: ['Computer Science Student', 'AI &amp; Data Analytics Intern', 'Software Developer'],
+        typeSpeed: 50,
+        backSpeed: 30,
+        backDelay: 1200,                  
+        loop: true
+      });
+    }
+
+    // Modal Operations Script (Handles visibility toggle cleanly)
+    document.addEventListener('DOMContentLoaded', () => {
+      const openBtn = document.getElementById('open-resume');
+      const closeBtn = document.getElementById('close-resume');
+      const modal = document.getElementById('resume-modal');
+
+      if (openBtn && modal && closeBtn) {
+        openBtn.addEventListener('click', () => {
+          modal.classList.add('active');
+          document.body.style.overflow = 'hidden'; 
+        });
+
+        closeBtn.addEventListener('click', () => {
+          modal.classList.remove('active');
+          document.body.style.overflow = ''; 
+        });
+
+        modal.addEventListener('click', (e) => {
+          if (e.target === modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = '';
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

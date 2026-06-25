@@ -1,0 +1,583 @@
+/* ==========================================================================
+   PORTFOLIO DESIGN ENGINE (Orange & Red Theme Spectrum)
+   ========================================================================== */
+
+:root {
+  /* LIGHT MODE VARIABLES (Default Setup) */
+  --bg-dark: #ffffff;
+  --accent: #ff4500; /* Vibrant Orange-Red / Sunset Burst */
+  --text-primary: #d32f2f; /* Deep Crimson Red */
+  --text-color: #111111;
+  --text-secondary: #ff7300; /* Bright Neon Orange */
+  --glass: rgba(255, 115, 0, 0.12); /* Soft Warm Amber Glass */
+  --glass-border: rgba(211, 47, 47, 0.4); /* Subtle Crimson Edge */
+  --transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* Resume System Variables */
+  --resume-viewer-bg: rgba(255, 255, 255, 0.8);
+}
+
+/* DARK MODE VARIABLE IMPLEMENTATIONS */
+[data-theme="dark"] {
+  --bg-dark: #0f0a0a; /* Ultra Dark Warm Charcoal */
+  --text-color: #ffffff;
+  --text-primary: #ff8a65; /* Soft, readable Sunset Coral */
+  --glass: rgba(20, 10, 10, 0.7); /* Deep Obsidian-Amber Glass */
+  --glass-border: rgba(255, 69, 0, 0.35); /* Glowing Fire Edge */
+  
+  /* Dark mode resume viewer tracking */
+  --resume-viewer-bg: rgba(255, 255, 255, 0.05);
+}
+
+/* Global Elements Configuration Reset */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  max-width: 100%;
+  overflow-x: hidden;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+  background-color: var(--bg-dark);
+  color: var(--text-color); 
+  line-height: 1.6;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Dynamic Ambient Glow Background Layers */
+.gradient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle at 10% 20%, rgba(255, 69, 0, 0.12) 0%, transparent 45%),
+              radial-gradient(circle at 90% 80%, rgba(211, 47, 47, 0.12) 0%, transparent 45%);
+  z-index: -1;
+}
+
+/* ==========================================================================
+   NAVIGATION BAR & GLOBAL HEADER STYLES
+   ========================================================================== */
+
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 5%;
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 1000;
+  border-bottom: 1px solid var(--glass-border);
+  background: rgba(255, 255, 255, 0.01);
+  display: flex;
+  flex-direction: column !important;
+  gap: 1rem;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.logo-container{
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: -1px;
+}
+.logo-container .circular-logo{
+    width: 60px;
+    height: 60px;
+
+    border-radius: 50%;
+    object-fit: contain;   
+
+    background: black;
+    padding: 6px;
+
+    border: 2px solid #ff5e00;
+    box-shadow: 0 0 20px rgba(255,94,0,0.7);
+
+    display: block;
+}
+
+nav {
+    display: flex !important;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem; /* Evenly spaces out your links and the toggle button */
+    width: 100%;
+}
+
+nav a {
+  color: var(--text-primary);
+  text-decoration: none;
+  margin-left: 0;
+  font-weight: 500;
+  font-size: 0.9rem;
+  transition: var(--transition);
+  padding: 4px 8px;
+  display: inline-block !important;
+}
+nav #theme-toggle {
+    margin-left: 0 !important;        /* Removes desktop spacing push */
+    padding: 4px 8px !important;
+  }
+
+nav a:hover {
+  color: var(--accent);
+  text-shadow: 0 0 8px rgba(255, 69, 0, 0.6);
+}
+
+/* --- Dynamic Active UI/UX Highlight System --- */
+.nav-link {
+  position: relative;
+  padding: 5px 0;
+}
+
+/* Active Highlight state injected dynamically via javascript */
+.nav-link.active {
+  color: var(--accent) !important;
+  font-weight: 700;
+  text-shadow: 0 0 10px rgba(255, 69, 0, 0.4);
+}
+
+.nav-link.active::after {
+  content: '';
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 100%;
+  height: 2px;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  border-radius: 2px;
+}
+
+/* Header Micro-Interactive Theme Toggle Switcher */
+#theme-toggle {
+  transition: transform 0.2s ease;
+}
+#theme-toggle:hover {
+  transform: scale(1.15);
+}
+
+/* --- Circular Theme Logo Engine --- */
+.logo-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.circular-logo {
+  width: 45px;
+  height: 45px;
+  object-fit: cover;
+  border-radius: 50%; /* Cuts the logo image perfectly into a circle */
+  border: 2px solid var(--accent); /* Uses your sunset orange variable for the frame */
+  box-shadow: 0 0 12px rgba(255, 69, 0, 0.5); /* Ambient neon inner glow */
+  transition: var(--transition);
+}
+
+/* Micro-interaction response when mouse floats over the logo */
+.circular-logo:hover {
+  transform: scale(1.08) rotate(5deg);
+  box-shadow: 0 0 18px var(--accent);
+  filter: brightness(1.15);
+}
+
+/* ==========================================================================
+   HOMEPAGE HERO SECTOR LAYOUT
+   ========================================================================== */
+
+.hero {
+  height: 90vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 0 10%;
+}
+
+.hero h1 {
+  font-size: clamp(2.5rem, 8vw, 4.5rem);
+  margin-bottom: 1rem;
+  letter-spacing: -2px;
+}
+
+.subtitle {
+  font-size: clamp(1.1rem, 3vw, 1.5rem);
+  color: #ff5722; /* High-contrast layout shade formatting */
+  margin-bottom: 2rem;
+}
+
+.highlight {
+  color: var(--accent);
+  font-weight: 700;
+}
+
+/* --- Homepage Hero Micro-Social Row --- */
+.hero-socials {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 1.5rem;
+}
+
+.hero-social-icon {
+  font-size: 1.8rem;
+  color: var(--text-primary);
+  transition: var(--transition);
+  text-decoration: none;
+  opacity: 0.8;
+}
+
+.hero-social-icon:hover {
+  transform: translateY(-3px) scale(1.1);
+  color: var(--accent);
+  opacity: 1;
+  filter: drop-shadow(0 0 8px var(--accent));
+}
+
+/* ==========================================================================
+   BUTTON STRUCTURAL ALIGNMENTS
+   ========================================================================== */
+
+.btn {
+  padding: 0.8rem 2rem;
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  display: inline-block;
+  transition: var(--transition); /* This ensures the glow fades in smoothly */
+  cursor: pointer;
+}
+
+.primary {
+  background: var(--accent);
+  color: white;
+  box-shadow: 0 10px 20px -10px var(--accent);
+  border: none;
+}
+
+.secondary {
+  border: 1px solid var(--glass-border);
+  color: white; 
+  margin-left: 1rem;
+  background: var(--accent);
+   box-shadow: 0 10px 20px -10px var(--accent);
+}
+
+/* --- HOVER EFFECTS (This makes them shine when your mouse is over them) --- */
+
+.btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px -8px var(--accent);
+}
+
+.primary:hover {
+  filter: brightness(1.2);
+}
+
+/* This forces the secondary button to fill with color and glow on hover */
+.secondary:hover {
+  background: var(--accent) !important;       /* Forces the orange background */
+  color: #ffffff !important;                   /* Forces the text to turn white */
+  border-color: var(--accent) !important;      /* Changes the border color */
+  box-shadow: 0 0 25px var(--accent) !important; /* Spreads a bright neon shine */
+}
+
+/* ==========================================================================
+   DYNAMIC RESUME PREVIEW COMPONENT
+   ========================================================================== */
+
+#resume h2 {
+  color: var(--text-primary);
+}
+
+#resume p {
+  color: var(--text-color);
+}
+
+.resume-viewer {
+  background: var(--resume-viewer-bg);
+  transition: background-color 0.3s ease;
+}
+
+/* ==========================================================================
+   GLASSMORPHISM ARCHITECTURE GRID CONFIGURATIONS
+   ========================================================================== */
+
+.container {
+  max-width: 1300px;
+  margin: 0 auto;
+  padding: 3rem 3%;
+}
+
+.glass-card {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  backdrop-filter: blur(15px);
+  padding: 1.5rem;
+  border-radius: 24px;
+  transition: var(--transition);
+  height: 100%;
+}
+
+.glass-card h3 {
+  text-align: left;
+}
+
+.glass-card:hover {
+  border-color: var(--accent);
+  background: rgba(255, 69, 0, 0.05);
+  transform: translateY(-10px);
+  box-shadow: 0 10px 20px rgba(255, 69, 0, 0.1);
+}
+
+.card-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+  margin-top: 3rem;
+}
+
+/* ==========================================================================
+   TYPOGRAPHY ELEMENTS & SYSTEM LIST ARRAYS
+   ========================================================================== */
+
+h1, h2, h3 {
+  color: var(--text-primary);
+  text-align: center;
+}
+
+.skill-list {
+  list-style: none;
+  margin-top: 1rem;
+}
+
+.skill-list li {
+  padding: 0.5rem 0;
+  color: var(--text-color);
+  display: flex;
+  align-items: center;
+}
+
+.skill-list li::before {
+  content: '→';
+  color: var(--accent);
+  margin-right: 10px;
+  font-weight: bold;
+}
+
+.skill-list li a,
+.skill-list li a:visited {
+  color: var(--text-primary) !important;
+  text-decoration: none;
+  transition: var(--transition);
+}
+
+.skill-list li a:hover {
+  text-decoration: underline;
+  color: var(--accent) !important;
+}
+
+/* ==========================================================================
+   EDUCATION SEGMENT TIMELINES
+   ========================================================================== */
+
+.timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.date {
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+}
+
+/* ==========================================================================
+   FORM CONTROLS FOR CONTACT COMPONENT
+   ========================================================================== */
+
+input, textarea {
+  width: 100%;
+  padding: 1rem;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 12px;
+  color: var(--text-color);
+  margin-top: 0.5rem;
+  margin-bottom: 0.8rem;
+  outline: none;
+  transition: var(--transition);
+}
+
+input:focus, textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(255, 69, 0, 0.2);
+}
+/* ===== RESUME MODAL ===== */
+
+.modal-overlay{
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.7);
+
+    display: none;   /* IMPORTANT */
+    
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+    padding: 20px;
+}
+
+.modal-overlay.active{
+    display: flex;
+}
+
+.modal-content{
+    width: 90%;
+    max-width: 1200px;
+    height: 90vh;
+    border-radius: 20px;
+    overflow: hidden;
+    background: var(--card-bg);
+    position: relative;
+}
+
+.modal-header{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px;
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.modal-body{
+    height: calc(90vh - 80px);
+}
+
+.modal-body object{
+    width: 100%;
+    height: 100%;
+}
+
+.close-btn{
+    background: none;
+    border: none;
+    font-size: 32px;
+    cursor: pointer;
+    color: var(--text-primary);
+}
+/* Form Contact Footer Social Matrices */
+footer {
+  margin-top: 2rem;
+  padding: 2rem 2;
+  text-align: center;
+  border-top: 1px solid rgba(13, 3, 3, 0.1);
+}
+.social-media {
+  display: flex;
+  justify-content: center;
+  gap: 1.5rem;
+  margin-top: 2rem;
+}
+
+.social-media a {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 44px;
+  height: 44px;
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  border-radius: 50%;
+  font-size: 1.4rem;
+  color: var(--text-primary);
+  transition: var(--transition);
+  text-decoration: none;
+}
+
+.social-media a:hover {
+  transform: scale(1.1) translateY(-5px);
+  background-color: var(--accent);
+  color: var(--bg-dark);
+  border-color: var(--accent);
+  box-shadow: 0 0 20px var(--accent);
+}
+
+form .btn {
+  background: var(--glass);
+  border: 1px solid var(--glass-border);
+  color: var(--text-color);
+  width: 100%;
+  margin-top: 0.5rem;
+}
+
+form .btn:hover {
+  background: var(--accent);
+  color: #ffffff;
+  border-color: var(--accent);
+}
+
+/* ==========================================================================
+   MOBILE MEDIA QUERY LAYOUT OVERRIDES
+   ========================================================================== */
+
+@media (max-width: 768px) {
+  html, body {
+    position: relative;
+    overflow-x: hidden !important;
+    width: 100%;
+  }
+
+  header { 
+    padding: 1rem 5%; 
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  
+  nav a { 
+    display: none; 
+  } 
+  
+  .hero h1 { 
+    font-size: 2.5rem; 
+  }
+  
+  /* This will now target the container correctly */
+  .buttons {
+    display: flex;
+    flex-direction: column !important;
+    gap: 12px !important;
+    align-items: center;
+    width: 100%;
+    padding: 0 20px;
+    box-sizing: border-box;
+  }
+  
+  /* Give buttons fluid flexibility instead of forcing a small 250px cap */
+  .primary, .secondary {
+    width: 100% !important;
+    max-width: 320px !important; 
+    margin-left: 0 !important; 
+    text-align: center;
+    justify-content: center;
+    box-sizing: border-box;
+  }
+}
