@@ -21,13 +21,16 @@ if db_url:
         db_url = db_url.replace('postgres://', 'postgresql+pg8000://', 1)
     elif db_url.startswith('postgresql://'):
         db_url = db_url.replace('postgresql://', 'postgresql+pg8000://', 1)
+
+    # pg8000 doesn't understand ?sslmode=... in the URL — strip it
+    if '?' in db_url:
+        db_url = db_url.split('?')[0]
+
     app.config['SQLALCHEMY_DATABASE_URI'] = db_url
-else:
-    sqlite_db_path = os.path.join(base_dir, 'portfolio.db')
-    app.config['SQLALCHEMY_DATABASE_URI'] = f'sqlite:///{sqlite_db_path}'
-
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-
+    # Tell pg8000 to use SSL via connect_args instead of the URL param
+    app.config['SQLALCHEMY_ENGINE_OPTIONS'] = {
+        'connect_args': {'ssl_context': True}
+    }
 db = SQLAlchemy(app)
 
 # Database Model for Contact Messages
