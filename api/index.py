@@ -6,11 +6,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 
-base_dir = os.path.abspath(os.path.join(os.path.dirname(_file_), ".."))
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(base_dir, "templates")
 static_dir = os.path.join(base_dir, "static")
 
-app = Flask(_name_, template_folder=template_dir, static_folder=static_dir)
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "portfolio-secret-key-12345")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -43,7 +43,7 @@ db = SQLAlchemy(app)
 
 
 class ContactMessage(db.Model):
-    _tablename_ = "contact_messages"
+    __tablename__ = "contact_messages"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -53,7 +53,7 @@ class ContactMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<ContactMessage {self.email} - {self.subject}>"
 
 
@@ -120,14 +120,10 @@ def contact():
         except Exception as e:
             db.session.rollback()
             print(f"Database error: {e}")
-            flash(
-                "There was an error saving your message. Please try again later or email directly.",
-                "danger",
-            )
-
-        return redirect(url_for("contact"))
-
-    return render_template("contact.html")
-
-if __name__ == "__main__":
+            flash('There was an error saving your message. Please try again later or email directly.', 'danger')
+            
+        return redirect(url_for('contact'))
+        
+    return render_template('contact.html')
+if __name__ == '__main__':
     app.run(debug=True, port=5000)
