@@ -1,7 +1,6 @@
 import os
 import ssl
 from datetime import datetime
-from sqlalchemy import create_engine
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -11,13 +10,6 @@ base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(base_dir, "templates")
 static_dir = os.path.join(base_dir, "static")
 
-# Create an insecure SSL context specifically for pg8000
-ssl_context = ssl._create_unverified_context()
-
-engine = create_engine(
-    DATABASE_URL,
-    connect_args={"ssl_context": ssl_context}
-)
 app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "portfolio-secret-key-12345")
@@ -38,7 +30,7 @@ if db_url:
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "connect_args": {
-            "ssl_context": ssl.create_default_context()
+            "ssl_context": ssl._create_unverified_context()
         }
     }
 else:
