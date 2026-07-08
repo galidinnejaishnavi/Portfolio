@@ -6,11 +6,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 
-base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+base_dir = os.path.abspath(os.path.join(os.path.dirname(_file_), ".."))
 template_dir = os.path.join(base_dir, "templates")
 static_dir = os.path.join(base_dir, "static")
 
-app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
+app = Flask(_name_, template_folder=template_dir, static_folder=static_dir)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "portfolio-secret-key-12345")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
@@ -43,7 +43,7 @@ db = SQLAlchemy(app)
 
 
 class ContactMessage(db.Model):
-    __tablename__ = "contact_messages"
+    _tablename_ = "contact_messages"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -53,7 +53,7 @@ class ContactMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def __repr__(self):
+    def _repr_(self):
         return f"<ContactMessage {self.email} - {self.subject}>"
 
 
