@@ -6,11 +6,11 @@ from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
 
-base_dir = os.path.abspath(os.path.join(os.path.dirname(_file_), ".."))
+base_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
 template_dir = os.path.join(base_dir, "templates")
 static_dir = os.path.join(base_dir, "static")
 
-app = Flask(_name_, template_folder=template_dir, static_folder=static_dir)
+app = Flask(__name__, template_folder=template_dir, static_folder=static_dir)
 
 app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "portfolio-secret-key-12345")
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
