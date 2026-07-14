@@ -36,14 +36,16 @@ if db_url:
 else:
     # Temporary SQLite fallback so the site does not crash.
     # For real production contact form storage, use Postgres.
-    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/portfolio.db"
+    sqlite_db_path = os.path.join(base_dir, "portfolio.db")
+    sqlite_db_uri = f"sqlite:///{sqlite_db_path.replace(os.path.sep, "/")}" 
+    app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_db_uri
 
 
 db = SQLAlchemy(app)
 
 
 class ContactMessage(db.Model):
-    _tablename_ = "contact_messages"
+    __tablename__ = "contact_messages"
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(100), nullable=False)
@@ -53,7 +55,7 @@ class ContactMessage(db.Model):
     message = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    def _repr_(self):
+    def __repr__(self):
         return f"<ContactMessage {self.email} - {self.subject}>"
 
 
