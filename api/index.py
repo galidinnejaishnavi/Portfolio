@@ -1,6 +1,8 @@
 import os
 import ssl
+import smtplib
 from datetime import datetime
+from email.message import EmailMessage
 
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
@@ -42,6 +44,45 @@ else:
 
 
 db = SQLAlchemy(app)
+
+
+def send_contact_email(message: 'ContactMessage') -> None:
+    mail_server = os.environ.get("MAIL_SERVER")
+    mail_port = os.environ.get("MAIL_PORT")
+    mail_username = os.environ.get("MAIL_USERNAME")
+    mail_password = os.environ.get("MAIL_PASSWORD")
+    mail_to = os.environ.get("MAIL_TO") or mail_username
+    mail_use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes")
+    mail_use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes")
+
+    if not (mail_server and mail_port and mail_username and mail_password and mail_to):
+        return
+
+    email = EmailMessage()
+    email["Subject"] = f"New website message: {message.subject}"
+    email["From"] = mail_username
+    email["To"] = mail_to
+    email.set_content(
+        f"Name: {message.name}\n"
+        f"Email: {message.email}\n"
+        f"Phone: {message.phone or 'N/A'}\n"
+        f"Subject: {message.subject}\n\n"
+        f"Message:\n{message.message}\n\n"
+        f"Received: {message.created_at}"
+    )
+
+    port = int(mail_port)
+    if mail_use_ssl:
+        context = ssl.create_default_context()
+        with smtplib.SMTP_SSL(mail_server, port, context=context) as smtp:
+            smtp.login(mail_username, mail_password)
+            smtp.send_message(email)
+    else:
+        with smtplib.SMTP(mail_server, port) as smtp:
+            if mail_use_tls:
+                smtp.starttls(context=ssl.create_default_context())
+            smtp.login(mail_username, mail_password)
+            smtp.send_message(email)
 
 
 class ContactMessage(db.Model):
@@ -114,10 +155,23 @@ def contact():
             db.session.add(new_msg)
             db.session.commit()
 
-            flash(
-                "Your message has been sent successfully! Thank you for reaching out.",
-                "success",
-            )
+            email_error = None
+            try:
+                send_contact_email(new_msg)
+            except Exception as e:
+                email_error = e
+                print(f"Email error: {e}")
+
+            if email_error:
+                flash(
+                    "Your message was saved, but email notification could not be delivered.",
+                    "danger",
+                )
+            else:
+                flash(
+                    "Your message has been sent successfully! Thank you for reaching out.",
+                    "success",
+                )
 
         except Exception as e:
             db.session.rollback()
