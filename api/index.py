@@ -30,7 +30,7 @@ if db_url:
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "connect_args": {
-            "ssl_context": ssl._create_unverified_context()
+            "ssl_context": ssl.create_default_context()
         }
     }
 else:
