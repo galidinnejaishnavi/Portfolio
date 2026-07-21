@@ -34,14 +34,19 @@ if db_url:
         }
     }
 else:
-    # Temporary SQLite fallback so the site does not crash.
-    # For real production contact form storage, use Postgres.
-    sqlite_db_path = os.path.join(base_dir, "portfolio.db")
-    sqlite_db_uri = f"sqlite:///{sqlite_db_path.replace(os.path.sep, "/")}"
-    app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_db_uri
+    # If running on Vercel without a Postgres database attached yet, use writable /tmp folder
+    if os.environ.get("VERCEL"):
+        sqlite_db_path = "/tmp/portfolio.db"
+    else:
+        sqlite_db_path = os.path.join(base_dir, "portfolio.db")
+    
+    app.config["SQLALCHEMY_DATABASE_URI"] = f"sqlite:///{sqlite_db_path}"
 
 
 db = SQLAlchemy(app)
+
+
+
 
 
 def is_mail_configured() -> bool:
@@ -97,7 +102,10 @@ class ContactMessage(db.Model):
 
 
 with app.app_context():
-    db.create_all()
+    try:
+        db.create_all()
+    except Exception as e:
+        print(f"Database setup warning/error: {e}")
 
 
 @app.route("/")
