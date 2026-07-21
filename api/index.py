@@ -107,6 +107,13 @@ with app.app_context():
         print(f"Database setup warning/error: {e}")
 
 
+@app.route("/favicon.ico")
+@app.route("/favicon.png")
+def favicon():
+    from flask import send_from_directory
+    return send_from_directory(static_dir, "logo.png", mimetype="image/png")
+
+
 @app.route("/")
 @app.route("/home")
 def home():
