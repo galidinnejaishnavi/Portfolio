@@ -1,9 +1,7 @@
 import os
 import ssl
-import smtplib
 from datetime import datetime
-from email.message import EmailMessage
-
+import resend
 from flask import Flask, render_template, request, redirect, url_for, flash
 from flask_sqlalchemy import SQLAlchemy
 
@@ -39,30 +37,31 @@ else:
     # Temporary SQLite fallback so the site does not crash.
     # For real production contact form storage, use Postgres.
     sqlite_db_path = os.path.join(base_dir, "portfolio.db")
-    sqlite_db_uri = f"sqlite:///{sqlite_db_path.replace(os.path.sep, "/")}" 
+    sqlite_db_uri = f"sqlite:///{sqlite_db_path.replace(os.path.sep, "/")}"
     app.config["SQLALCHEMY_DATABASE_URI"] = sqlite_db_uri
 
 
 db = SQLAlchemy(app)
 
 
+def is_mail_configured() -> bool:
+    required = [
+        os.environ.get("RESEND_API_KEY"),
+        os.environ.get("MAIL_FROM"),
+        os.environ.get("MAIL_TO"),
+    ]
+    return all(required)
+
+
 def send_contact_email(message: 'ContactMessage') -> None:
-    mail_server = os.environ.get("MAIL_SERVER")
-    mail_port = os.environ.get("MAIL_PORT")
-    mail_username = os.environ.get("MAIL_USERNAME")
-    mail_password = os.environ.get("MAIL_PASSWORD")
-    mail_to = os.environ.get("MAIL_TO") or mail_username
-    mail_use_ssl = os.environ.get("MAIL_USE_SSL", "false").lower() in ("1", "true", "yes")
-    mail_use_tls = os.environ.get("MAIL_USE_TLS", "true").lower() in ("1", "true", "yes")
+    if not is_mail_configured():
+        raise RuntimeError("Mail configuration is incomplete")
 
-    if not (mail_server and mail_port and mail_username and mail_password and mail_to):
-        return
+    resend.api_key = os.environ.get("RESEND_API_KEY")
+    mail_from = os.environ.get("MAIL_FROM")
+    mail_to = os.environ.get("MAIL_TO")
 
-    email = EmailMessage()
-    email["Subject"] = f"New website message: {message.subject}"
-    email["From"] = mail_username
-    email["To"] = mail_to
-    email.set_content(
+    text_body = (
         f"Name: {message.name}\n"
         f"Email: {message.email}\n"
         f"Phone: {message.phone or 'N/A'}\n"
@@ -71,18 +70,15 @@ def send_contact_email(message: 'ContactMessage') -> None:
         f"Received: {message.created_at}"
     )
 
-    port = int(mail_port)
-    if mail_use_ssl:
-        context = ssl.create_default_context()
-        with smtplib.SMTP_SSL(mail_server, port, context=context) as smtp:
-            smtp.login(mail_username, mail_password)
-            smtp.send_message(email)
-    else:
-        with smtplib.SMTP(mail_server, port) as smtp:
-            if mail_use_tls:
-                smtp.starttls(context=ssl.create_default_context())
-            smtp.login(mail_username, mail_password)
-            smtp.send_message(email)
+    params: resend.Emails.SendParams = {
+        "from": mail_from,
+        "to": [mail_to],
+        "reply_to": message.email,
+        "subject": f"New website message: {message.subject}",
+        "text": text_body,
+    }
+
+    resend.Emails.send(params)
 
 
 class ContactMessage(db.Model):
@@ -163,10 +159,16 @@ def contact():
                 print(f"Email error: {e}")
 
             if email_error:
-                flash(
-                    "Your message was saved, but email notification could not be delivered.",
-                    "danger",
-                )
+                if isinstance(email_error, RuntimeError) and "Mail configuration" in str(email_error):
+                    flash(
+                        "Your message was saved, but email notifications are not configured.",
+                        "warning",
+                    )
+                else:
+                    flash(
+                        "Your message was saved, but email notification could not be delivered.",
+                        "danger",
+                    )
             else:
                 flash(
                     "Your message has been sent successfully! Thank you for reaching out.",
@@ -177,9 +179,11 @@ def contact():
             db.session.rollback()
             print(f"Database error: {e}")
             flash('There was an error saving your message. Please try again later or email directly.', 'danger')
-            
+
         return redirect(url_for('contact'))
-        
+
     return render_template('contact.html')
+
+
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
