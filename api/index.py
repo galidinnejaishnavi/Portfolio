@@ -25,9 +25,33 @@ db_url = (
 )
 
 if db_url:
-    from urllib.parse import urlparse, urlunparse
+    from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
+
     parsed = urlparse(db_url)
-    db_url = urlunparse(("postgresql+pg8000", parsed.netloc, parsed.path, "", "", ""))
+    query_params = dict(parse_qsl(parsed.query))
+    removed_params = []
+
+    for bad_param in ["sslmode", "sslrootcert", "sslcert", "sslkey", "sslcrl"]:
+        if bad_param in query_params:
+            removed_params.append(bad_param)
+            query_params.pop(bad_param)
+
+    if parsed.scheme.startswith("postgres"):
+        db_url = urlunparse(
+            (
+                "postgresql+pg8000",
+                parsed.netloc,
+                parsed.path,
+                "",
+                urlencode(query_params),
+                "",
+            )
+        )
+    else:
+        db_url = urlunparse(parsed)
+
+    if removed_params:
+        print(f"Removed unsupported database URL params: {', '.join(removed_params)}")
 
     ssl_ctx = ssl.create_default_context()
     ssl_ctx.check_hostname = False
