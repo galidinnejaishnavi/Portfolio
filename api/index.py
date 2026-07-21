@@ -30,13 +30,14 @@ if db_url:
     elif db_url.startswith("postgresql://"):
         db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
-    if "?" in db_url:
-        db_url = db_url.split("?")[0]
+    ssl_ctx = ssl.create_default_context()
+    ssl_ctx.check_hostname = False
+    ssl_ctx.verify_mode = ssl.CERT_NONE
 
     app.config["SQLALCHEMY_DATABASE_URI"] = db_url
     app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
         "connect_args": {
-            "ssl_context": ssl.create_default_context()
+            "ssl_context": ssl_ctx
         }
     }
 else:
@@ -191,8 +192,16 @@ def contact():
 
         except Exception as e:
             db.session.rollback()
-            print(f"Database error: {e}")
-            flash('There was an error saving your message. Please try again later or email directly.', 'danger')
+            print(f"Initial DB error: {e}")
+            try:
+                db.create_all()
+                db.session.add(new_msg)
+                db.session.commit()
+                flash("Your message has been sent successfully! Thank you for reaching out.", "success")
+            except Exception as retry_err:
+                db.session.rollback()
+                print(f"Database error on retry: {retry_err}")
+                flash(f"Database error: {retry_err}", "danger")
 
         return redirect(url_for('contact'))
 
