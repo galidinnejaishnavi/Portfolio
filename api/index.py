@@ -30,6 +30,11 @@ if db_url:
     elif db_url.startswith("postgresql://"):
         db_url = db_url.replace("postgresql://", "postgresql+pg8000://", 1)
 
+    # Strip query parameters (like ?sslmode=require) since pg8000 connect() doesn't accept them.
+    # Encryption is handled explicitly via the ssl_context parameter below.
+    if "?" in db_url:
+        db_url = db_url.split("?")[0]
+
     ssl_ctx = ssl.create_default_context()
     ssl_ctx.check_hostname = False
     ssl_ctx.verify_mode = ssl.CERT_NONE
