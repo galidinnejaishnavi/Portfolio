@@ -16,7 +16,13 @@ app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY", "portfolio-secret-key-12
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 
-db_url = os.environ.get("DATABASE_URL") or os.environ.get("POSTGRES_URL")
+db_url = (
+    os.environ.get("DATABASE_URL_POSTGRES_URL")
+    or os.environ.get("DATABASE_URL_POSTGRES_PRISMA_URL")
+    or os.environ.get("DATABASE_URL")
+    or os.environ.get("POSTGRES_URL")
+    or os.environ.get("SUPABASE_DB_URL")
+)
 
 if db_url:
     if db_url.startswith("postgres://"):
@@ -46,25 +52,18 @@ else:
 db = SQLAlchemy(app)
 
 
-
-
-
 def is_mail_configured() -> bool:
-    required = [
-        os.environ.get("RESEND_API_KEY"),
-        os.environ.get("MAIL_FROM"),
-        os.environ.get("MAIL_TO"),
-    ]
-    return all(required)
+    return bool(os.environ.get("RESEND_API_KEY"))
 
 
 def send_contact_email(message: 'ContactMessage') -> None:
-    if not is_mail_configured():
-        raise RuntimeError("Mail configuration is incomplete")
+    api_key = os.environ.get("RESEND_API_KEY")
+    if not api_key:
+        raise RuntimeError("RESEND_API_KEY environment variable is missing")
 
-    resend.api_key = os.environ.get("RESEND_API_KEY")
-    mail_from = os.environ.get("MAIL_FROM")
-    mail_to = os.environ.get("MAIL_TO")
+    resend.api_key = api_key
+    mail_from = os.environ.get("MAIL_FROM", "onboarding@resend.dev")
+    mail_to = os.environ.get("MAIL_TO", "galidinnejaishnavi@gmail.com")
 
     text_body = (
         f"Name: {message.name}\n"
@@ -79,7 +78,7 @@ def send_contact_email(message: 'ContactMessage') -> None:
         "from": mail_from,
         "to": [mail_to],
         "reply_to": message.email,
-        "subject": f"New website message: {message.subject}",
+        "subject": f"Portfolio Contact: {message.subject}",
         "text": text_body,
     }
 
