@@ -27,14 +27,44 @@ db_url = (
 if db_url:
     from urllib.parse import parse_qsl, urlencode, urlparse, urlunparse
 
-    parsed = urlparse(db_url)
-    query_params = dict(parse_qsl(parsed.query))
-    removed_params = []
+    def _mask_password(uri: str) -> str:
+        parsed_mask = urlparse(uri)
+        netloc = parsed_mask.netloc
+        if "@" in netloc:
+            userinfo, hostinfo = netloc.split("@", 1)
+            if ":" in userinfo:
+                user, _ = userinfo.split(":", 1)
+                netloc = f"{user}:***@{hostinfo}"
+        return urlunparse((parsed_mask.scheme, netloc, parsed_mask.path, parsed_mask.params, parsed_mask.query, parsed_mask.fragment))
 
-    for bad_param in ["sslmode", "sslrootcert", "sslcert", "sslkey", "sslcrl"]:
-        if bad_param in query_params:
-            removed_params.append(bad_param)
-            query_params.pop(bad_param)
+    original_db_url = db_url
+    parsed = urlparse(db_url)
+    query_items = parse_qsl(parsed.query, keep_blank_values=True)
+    removed_params = []
+    cleaned_items = []
+    
+    # pg8000.connect() only accepts these arguments. Any other parameters (like sslmode, options, etc.)
+    # passed as query params will raise a TypeError.
+    supported = {
+        "user",
+        "host",
+        "database",
+        "port",
+        "password",
+        "source_address",
+        "unix_sock",
+        "ssl_context",
+        "timeout",
+        "tcp_keepalive",
+        "application_name",
+        "replication",
+    }
+
+    for key, value in query_items:
+        if key.lower() in supported:
+            cleaned_items.append((key, value))
+        else:
+            removed_params.append(key)
 
     if parsed.scheme.startswith("postgres"):
         db_url = urlunparse(
@@ -43,7 +73,7 @@ if db_url:
                 parsed.netloc,
                 parsed.path,
                 "",
-                urlencode(query_params),
+                urlencode(cleaned_items),
                 "",
             )
         )
@@ -52,6 +82,8 @@ if db_url:
 
     if removed_params:
         print(f"Removed unsupported database URL params: {', '.join(removed_params)}")
+    print(f"Database URL before cleanup: {_mask_password(original_db_url)}")
+    print(f"Database URL after cleanup: {_mask_password(db_url)}")
 
     ssl_ctx = ssl.create_default_context()
     ssl_ctx.check_hostname = False
@@ -197,7 +229,7 @@ def contact():
                 print(f"Email error: {e}")
 
             if email_error:
-                if isinstance(email_error, RuntimeError) and "Mail configuration" in str(email_error):
+                if isinstance(email_error, RuntimeError) and "RESEND_API_KEY" in str(email_error):
                     flash(
                         "Your message was saved, but email notifications are not configured.",
                         "warning",
