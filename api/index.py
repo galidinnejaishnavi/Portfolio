@@ -229,7 +229,7 @@ def contact():
                 print(f"Email error: {e}")
 
             if email_error:
-                if isinstance(email_error, RuntimeError) and "RESEND_API_KEY" in str(email_error):
+                if isinstance(email_error, RuntimeError) and "Mail configuration" in str(email_error):
                     flash(
                         "Your message was saved, but email notifications are not configured.",
                         "warning",
@@ -265,3 +265,4 @@ def contact():
 
 if __name__ == '__main__':
     app.run(debug=True, port=5000)
+    
